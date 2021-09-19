@@ -4,18 +4,31 @@ import numpy as np
 import pandas as pd
 import pandas_datareader as web 
 import datetime as time
+import csv 
 
 
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
+from tensorflow.python.util.keras_deps import get_load_model_function
+
+
+#placing data from csv file to an array
+data =[]
+good_stocks =[]
+with open('file.csv', 'r') as f:
+    reader = csv.reader(f)
+    lists = list(f)
+for i in range(len(lists)):
+    data.append(lists[i].strip('\n'))
+print(len(data))
 
 
 #Loading the data
-list = ['TSLA,FB']
-for i in range(len(list)):
-        company = list[i]
-        start = time.datetime(2015,1,1)
+
+for i in range(len(data)):
+        company = data[1]
+        start = time.datetime(2014,1,1)
         end  = time.datetime(2020,1,1)
 
         data = web.DataReader(company , 'yahoo' , start,end)
@@ -53,7 +66,7 @@ for i in range(len(list)):
 
         #Test the model accuracy
 
-        test_start = time.datetime(2021,1,1)
+        test_start = time.datetime(2020,1,1)
         test_end = time.datetime.now()
 
         test_data = web.DataReader(company, 'yahoo',test_start, test_end)
@@ -97,5 +110,26 @@ for i in range(len(list)):
         prediction = scaler.inverse_transform(prediction)
         print(f"Prediction:{prediction}")
         print(f"Real:{predicted_prices}")
+        good = 0
+        bad = 0
+        print(np.sum(predicted_prices))
+        print(np.sum(actual_prices))
+                
+        if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.05 or np.sum(predicted_prices)/np.sum(actual_prices) >= 0.95:
+            good += 1
+            good_stocks.append(company)
+                
+        
+print(good_stocks)
+
+"""with open('good_stocks.csv','w', encoding='UTF8') as g:
+
+        writer = csv.writer(g)
+        writer.writerow(good_stocks)
+        """
+
+        
+
+        
 
         

@@ -53,7 +53,7 @@ for i in range(len(list)):
 
         #Test the model accuracy
 
-        test_start = time.datetime(2020,1,1)
+        test_start = time.datetime(2021,1,1)
         test_end = time.datetime.now()
 
         test_data = web.DataReader(company, 'yahoo',test_start, test_end)
@@ -87,7 +87,7 @@ for i in range(len(list)):
         plt.ylabel('Share price')
         plt.legend()
         plt.show()
-
+    
         #Predict Next Day
         real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
         real_data = np.array(real_data)
@@ -97,3 +97,5 @@ for i in range(len(list)):
         prediction = scaler.inverse_transform(prediction)
         print(f"Prediction:{prediction}")
         print(f"Real:{predicted_prices}")
+
+        

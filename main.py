@@ -12,7 +12,7 @@ from tensorflow.keras.layers import Dense, Dropout,LSTM
 
 
 #Loading the data
-list = ['TSLA']
+list = ['TSLA,FB']
 for i in range(len(list)):
         company = list[i]
         start = time.datetime(2015,1,1)

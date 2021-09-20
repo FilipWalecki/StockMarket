@@ -27,7 +27,7 @@ print(len(data))
 #Loading the data
 
 for i in range(len(data)):
-        company = data[1]
+        company = data[i]
         start = time.datetime(2014,1,1)
         end  = time.datetime(2020,1,1)
 
@@ -110,13 +110,10 @@ for i in range(len(data)):
         prediction = scaler.inverse_transform(prediction)
         print(f"Prediction:{prediction}")
         print(f"Real:{predicted_prices}")
-        good = 0
-        bad = 0
-        print(np.sum(predicted_prices))
-        print(np.sum(actual_prices))
+        
                 
         if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.05 or np.sum(predicted_prices)/np.sum(actual_prices) >= 0.95:
-            good += 1
+            
             good_stocks.append(company)
                 
         

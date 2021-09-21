@@ -12,24 +12,24 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
 from tensorflow.python.util.keras_deps import get_load_model_function
 
-
-#placing data from csv file to an array
-data =[]
 good_stocks =[]
+#placing data from csv file to an array
+stocks =[]
+
 with open('file.csv', 'r') as f:
     reader = csv.reader(f)
     lists = list(f)
 for i in range(len(lists)):
-    data.append(lists[i].strip('\n'))
-print(len(data))
+    stocks.append(lists[i].strip('\n'))
+
 
 
 #Loading the data
 
-for i in range(len(data)):
-        company = data[1]
-        start = time.datetime(2014,1,1)
-        end  = time.datetime(2020,1,1)
+for i in range(len(stocks)):
+        company = stocks[i]
+        start = time.datetime(2018,1,1)
+        end  = time.datetime(2021,1,1)
 
         data = web.DataReader(company , 'yahoo' , start,end)
         
@@ -66,7 +66,7 @@ for i in range(len(data)):
 
         #Test the model accuracy
 
-        test_start = time.datetime(2020,1,1)
+        test_start = time.datetime(2021,1,1)
         test_end = time.datetime.now()
 
         test_data = web.DataReader(company, 'yahoo',test_start, test_end)
@@ -92,14 +92,14 @@ for i in range(len(data)):
         predicted_prices = scaler.inverse_transform(predicted_prices)
 
         #Ploting the predictions
-
+        """
         plt.plot(actual_prices, color = 'red')
         plt.plot(predicted_prices,color ='green')
         plt.title(f'{company} share price')
         plt.xlabel('time')
         plt.ylabel('Share price')
         plt.legend()
-        plt.show()
+        plt.show()"""
     
         #Predict Next Day
         real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
@@ -108,25 +108,23 @@ for i in range(len(data)):
 
         prediction = model.predict(real_data)
         prediction = scaler.inverse_transform(prediction)
+        
         print(f"Prediction:{prediction}")
-        print(f"Real:{predicted_prices}")
-        good = 0
-        bad = 0
-        print(np.sum(predicted_prices))
-        print(np.sum(actual_prices))
+        #print(f"Real:{predicted_prices}")
+        
                 
         if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.05 or np.sum(predicted_prices)/np.sum(actual_prices) >= 0.95:
-            good += 1
+            
             good_stocks.append(company)
+            with open('good_stocks.csv','w', encoding='UTF8',newline ='') as g:
+
+                writer = csv.writer(g)
+                writer.writerow(company)
                 
         
 print(good_stocks)
 
-"""with open('good_stocks.csv','w', encoding='UTF8') as g:
 
-        writer = csv.writer(g)
-        writer.writerow(good_stocks)
-        """
 
         
 

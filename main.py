@@ -116,7 +116,7 @@ for i in range(len(stocks)):
         if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.05 or np.sum(predicted_prices)/np.sum(actual_prices) >= 0.95:
             
             good_stocks.append(company)
-            with open('good_stocks.csv','w', encoding='UTF8',newline ='') as g:
+               with open('good_stocks.csv','a', encoding='UTF8',newline ='') as g:
 
                 writer = csv.writer(g)
                 writer.writerow(company)

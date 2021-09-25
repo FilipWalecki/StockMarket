@@ -110,10 +110,11 @@ def analysis():
                 prediction = scaler.inverse_transform(prediction)
                 
                 print(f"Prediction:{prediction}")
+                print(f"Prediction:{company}")
                 #print(f"Real:{predicted_prices}")
                 
                         
-                if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.02 and np.sum(predicted_prices)/np.sum(actual_prices) >= 0.98:
+                if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.01 and np.sum(predicted_prices)/np.sum(actual_prices) >= 0.99:
                     
                     
                     with open('good_stocks.csv','a', newline="") as g:

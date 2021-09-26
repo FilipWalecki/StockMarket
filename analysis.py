@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
 from tensorflow.python.util.keras_deps import get_load_model_function
-
+from threading import Thread
 
 
 class analysis():
@@ -127,10 +127,13 @@ class analysis():
 
                 writer = csv.writer(g)
                 writer.writerow([self.good_stocks[i]])
+    def runall(self):
+        Thread(target= self.AddingToCsv()).start()
+        Thread(target= self.dataManipulation()).start()
+
 
 test = analysis()
-test.dataManipulation()
-test.AddingToCsv()
+test.runall()
 
 
 #Ploting the predictions

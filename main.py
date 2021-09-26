@@ -1,5 +1,7 @@
-import analysis
+import analysis as a
 import phaseTwo
 if __name__ == "__main__":
-    a = analysis.analysis()
+    run = a.analysis()
+    run.runall()
+    
     

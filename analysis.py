@@ -1,10 +1,12 @@
+from ast import Str
 from os import lseek
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pandas_datareader as web 
 import datetime as time
-import csv 
+import csv
+
 
 
 from sklearn.preprocessing import MinMaxScaler
@@ -12,26 +14,40 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
 from tensorflow.python.util.keras_deps import get_load_model_function
 
-def analysis():
-        #placing data from csv file to an array
-        stocks =[]
 
+
+class analysis():
+    def __init__(self):
+        self.stock = ""
+        self.stocks =[]
+        self.x_train =[]
+        self.y_train =[]
+        self.x_test = []
+        self.predicted_prices = []
+        self.actual_prices = []
+        self.good_stocks = []
+        
+    def dataManipulation(self):
+        #placing data from csv file to an array
         with open('file.csv', 'r') as f:
             reader = csv.reader(f)
             lists = list(f)
         for i in range(len(lists)):
-            stocks.append(lists[i].strip('\n'))
+            self.stocks.append(lists[i].strip('\n'))
 
 
 
         #Loading the data
 
-        for i in range(len(stocks)):
-                company = stocks[i]
+        for i in range(len(self.stocks)):
+                self.x_test = []
+                self.x_train = []
+                self.y_train = []
+                self.stock = self.stocks[i]
                 start = time.datetime(2018,1,1)
                 end  = time.datetime(2021,1,1)
 
-                data = web.DataReader(company , 'yahoo' , start,end)
+                data = web.DataReader(self.stock , 'yahoo' , start,end)
                 
 
                 #Prepare Data
@@ -40,19 +56,18 @@ def analysis():
 
                 PredictionDays = 60
 
-                x_train = []
-                y_train = []
+               
 
                 for x in range(PredictionDays,len(ScaledData)):
-                    x_train.append(ScaledData[x-PredictionDays:x, 0])
-                    y_train.append(ScaledData[x,0])
+                    self.x_train.append(ScaledData[x-PredictionDays:x, 0])
+                    self.y_train.append(ScaledData[x,0])
 
-                x_train,y_train = np.array(x_train), np.array(y_train)
-                x_train = np.reshape(x_train,(x_train.shape[0],x_train.shape[1],1))
+                self.x_train,self.y_train = np.array(self.x_train), np.array(self.y_train)
+                self.x_train = np.reshape(self.x_train,(self.x_train.shape[0],self.x_train.shape[1],1))
                 #build the model
                 model = Sequential()
 
-                model.add(LSTM(units =50,return_sequences=True,input_shape =(x_train.shape[1],1) ))
+                model.add(LSTM(units =50,return_sequences=True,input_shape =(self.x_train.shape[1],1) ))
                 model.add(Dropout(0.2))
                 model.add(LSTM(units=50 ,return_sequences=True))
                 model.add(Dropout(0.2))
@@ -61,7 +76,7 @@ def analysis():
                 model.add(Dense(units=1))
 
                 model.compile(optimizer='adam', loss = 'mean_squared_error')
-                model.fit(x_train,y_train ,epochs=25,batch_size =32)
+                model.fit(self.x_train,self.y_train ,epochs=25,batch_size =32)
 
 
                 #Test the model accuracy
@@ -69,8 +84,8 @@ def analysis():
                 test_start = time.datetime(2021,1,1)
                 test_end = time.datetime.now()
 
-                test_data = web.DataReader(company, 'yahoo',test_start, test_end)
-                actual_prices = test_data['Close'].values
+                test_data = web.DataReader(self.stock, 'yahoo',test_start, test_end)
+                self.actual_prices = test_data['Close'].values
 
                 total_dataset = pd.concat((data['Close'],test_data['Close']),axis = 0)
                 model_inputs = total_dataset[len(total_dataset)-len(test_data)-PredictionDays:].values
@@ -79,27 +94,18 @@ def analysis():
 
                 #Prediction on test data
 
-                x_test = []
 
                 for x in range(PredictionDays,len(model_inputs)):
-                    x_test.append(model_inputs[x+1-PredictionDays:x,0])
+                    self.x_test.append(model_inputs[x+1-PredictionDays:x,0])
 
 
-                x_test = np.array(x_test)
-                x_test = np.reshape(x_test,(x_test.shape[0],x_test.shape[1],1))
+                self.x_test = np.array(self.x_test)
+                self.x_test = np.reshape(self.x_test,(self.x_test.shape[0],self.x_test.shape[1],1))
 
-                predicted_prices = model.predict(x_test)
+                predicted_prices = model.predict(self.x_test)
                 predicted_prices = scaler.inverse_transform(predicted_prices)
 
-                #Ploting the predictions
-                """
-                plt.plot(actual_prices, color = 'red')
-                plt.plot(predicted_prices,color ='green')
-                plt.title(f'{company} share price')
-                plt.xlabel('time')
-                plt.ylabel('Share price')
-                plt.legend()
-                plt.show()"""
+            
             
                 #Predict Next Day
                 real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
@@ -110,17 +116,33 @@ def analysis():
                 prediction = scaler.inverse_transform(prediction)
                 
                 print(f"Prediction:{prediction}")
-                print(f"Prediction:{company}")
+                print(f"Prediction:{self.stock}")
                 #print(f"Real:{predicted_prices}")
+                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.01 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.99:
+                     self.good_stocks.append[self.stock]
                 
-                        
-                if np.sum(predicted_prices)/np.sum(actual_prices) <= 1.01 and np.sum(predicted_prices)/np.sum(actual_prices) >= 0.99:
-                    
-                    
-                    with open('good_stocks.csv','a', newline="") as g:
+    def AddingToCsv(self):      
+        for i in range(len(self.good_stocks)):
+            with open('good_stocks.csv','a', newline="") as g:
 
-                        writer = csv.writer(g)
-                        writer.writerow([stocks[i]])
+                writer = csv.writer(g)
+                writer.writerow([self.good_stocks[i]])
+
+test = analysis()
+test.dataManipulation()
+test.AddingToCsv()
+
+
+#Ploting the predictions
+"""
+                plt.plot(actual_prices, color = 'red')
+                plt.plot(predicted_prices,color ='green')
+                plt.title(f'{company} share price')
+                plt.xlabel('time')
+                plt.ylabel('Share price')
+                plt.legend()
+                plt.show()"""
+
                 
         
 

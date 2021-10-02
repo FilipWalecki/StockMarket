@@ -16,6 +16,7 @@ from tensorflow.python.util.keras_deps import get_load_model_function
 from threading import Thread
 
 
+
 class analysis():
     def __init__(self):
         self.stock = ""

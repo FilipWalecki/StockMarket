@@ -9,21 +9,20 @@ ib = IB()
 ib.connect('127.0.0.1', 7497, clientId=1)
 
 stocks = []
-with open('good_stocks.csv', 'r') as f:
+with open('currentorder.csv', 'r') as f:
             reader = csv.reader(f)
             lists = list(f)
-            for i in range(len(lists)):
-                stocks.append(lists[i].strip('\n'))
+            
 
 
 
-for i in range (len(stocks)):
+for i in range (len(list)):
 
         
         contract = Stock(stocks[i] ,'SMART','GDP')
         print(contract)
 
-        order = MarketOrder('BUY', 10)
+        order = MarketOrder('SELL', 10)
 
         with open ('currentorder.csv','a',newline = '') as y:
                   writer = csv.writer(g)
@@ -35,7 +34,3 @@ for i in range (len(stocks)):
 
         print(trade)
 ib.run()
-
-        
-
-        

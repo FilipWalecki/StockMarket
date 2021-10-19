@@ -25,7 +25,7 @@ for i in range (len(stocks)):
 
         order = MarketOrder('BUY', 1)
 
-        print(order)
+       
 
         trade = ib.placeOrder(contract , order)
 

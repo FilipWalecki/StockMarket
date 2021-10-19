@@ -6,7 +6,7 @@ import pandas as pd
 import pandas_datareader as web 
 import datetime as time
 import csv
-
+import sqlite3
 
 
 from sklearn.preprocessing import MinMaxScaler
@@ -27,6 +27,9 @@ class analysis():
         self.predicted_prices = []
         self.actual_prices = []
         self.good_stocks = []
+
+    
+        
         
     def dataManipulation(self):
         #placing data from csv file to an array

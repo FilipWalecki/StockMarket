@@ -20,10 +20,10 @@ with open('good_stocks.csv', 'r') as f:
 for i in range (len(stocks)):
 
         
-        contract = Stock(stocks[i] ,'SMART','USD')
+        contract = Stock(stocks[i] ,'SMART','GDP')
         print(contract)
 
-        order = MarketOrder('BUY', 1)
+        order = MarketOrder('BUY', 10)
 
        
 

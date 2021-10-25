@@ -2,6 +2,7 @@ from ast import Str
 from os import lseek
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.core.records import array
 import pandas as pd
 import pandas_datareader as web 
 import datetime as time
@@ -27,17 +28,33 @@ class analysis():
         self.predicted_prices = []
         self.actual_prices = []
         self.good_stocks = []
+        #establishing connection with database
+        self.conn = sqlite3.connect('stocks.db')
+        self.cursor = self.conn.cursor()
 
     
         
         
     def dataManipulation(self):
-        #placing data from csv file to an array
-        with open('file.csv', 'r') as f:
+        """with open('file.csv', 'r') as f:
             reader = csv.reader(f)
             lists = list(f)
         for i in range(len(lists)):
-            self.stocks.append(lists[i].strip('\n'))
+            self.stocks.append(lists[i].strip('\n'))"""
+
+        #loading hte values from databse into a list
+        
+        transfroming = []
+
+        self.cursor.execute('''SELECT * FROM stock''')
+
+        rows = self.cursor.fetchall()
+        for row in rows:
+            self.stocks.append(str(row[0]))
+    
+        
+        
+       
 
 
 
@@ -106,41 +123,61 @@ class analysis():
                 self.x_test = np.array(self.x_test)
                 self.x_test = np.reshape(self.x_test,(self.x_test.shape[0],self.x_test.shape[1],1))
 
-                predicted_prices = model.predict(self.x_test)
-                predicted_prices = scaler.inverse_transform(predicted_prices)
-
-            
-            
+                self.predicted_prices = model.predict(self.x_test)
+                self.predicted_prices = scaler.inverse_transform(self.predicted_prices)
+                   
                 #Predict Next Day
+                
                 real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
                 real_data = np.array(real_data)
                 real_data = np.reshape(real_data,(real_data.shape[0],real_data.shape[1],1))
 
                 prediction = model.predict(real_data)
                 prediction = scaler.inverse_transform(prediction)
+
+                #predicitng the 4th day in order to see if the stock will rise or fall
+                prediction2 = [model_inputs[len(model_inputs)+4 - PredictionDays:len(model_inputs+4 ),0]]
+                prediction2 = np.array(prediction2)
+                prediction2 = np.reshape(prediction2,(prediction2.shape[0],prediction2.shape[1],1))
+
+                predicted2 = model.predict(prediction2)
+                predicted2 = scaler.inverse_transform(predicted2 )
+
+               
                 
                 print(f"Prediction:{prediction}")
-                print(f"Prediction:{self.stock}")
-                #print(f"Real:{predicted_prices}")
-                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.01 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.99:
-                     self.good_stocks.append[self.stock]
+                print(f"Prediction:{predicted2}")
                 
-    def AddingToCsv(self):      
-        for i in range(len(self.good_stocks)):
-            with open('good_stocks.csv','a', newline="") as g:
+                
+                #print(f"Prediction:{self.stock}")
+                #print(f"Real:{self.predicted_prices}")
 
-                writer = csv.writer(g)
-                writer.writerow([self.good_stocks[i]])
+                
+                #Checking if thew prediction was accurate
+                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.005 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.995 and prediction>predicted2:
+                     self.good_stocks.append(self.stock)
+                
+                
+    def AddingToCsv(self): 
+      
+            print(self.good_stocks)     
+            for i in range(len(self.good_stocks)):
+                self.cursor.execute('INSERT INTO passed VALUES(?)',(self.good_stocks[i],))
+
+                self.conn.commit()
+            
     def runall(self):
-        Thread(target= self.AddingToCsv()).start()
+        
         Thread(target= self.dataManipulation()).start()
+        #func1_thread = Thread(target= self.dataManipulation)
+        
+        #while func1_thread.is_
+        Thread(target= self.AddingToCsv()).start()
 
 
-test = analysis()
-test.runall()
 
 
-#Ploting the predictions
+#Ploting the predictions dont need it now might use it in the future
 """
                 plt.plot(actual_prices, color = 'red')
                 plt.plot(predicted_prices,color ='green')

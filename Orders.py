@@ -3,34 +3,44 @@ import csv
 import pandas as pd
 import pandas_datareader as web 
 import datetime as time
+import sqlite3
 # util.startLoop()  # uncomment this line when in a notebook
-
-ib = IB()
-ib.connect('127.0.0.1', 7497, clientId=1)
-
-stocks = []
-with open('good_stocks.csv', 'r') as f:
-            reader = csv.reader(f)
-            lists = list(f)
-            for i in range(len(lists)):
-                stocks.append(lists[i].strip('\n'))
+def connection():
+        ib = IB()
+        ib.connect('127.0.0.1', 7497, clientId=1)
 
 
 
-for i in range (len(stocks)):
+def buying():
+
+        stocks = []
+        conn = sqlite3.connect('stocks.db')
+        cursor = conn.cursor()
+
+        cursor.execute('''SELECT * FROM passed''')
+
+        rows =cursor.fetchall()
+        for row in rows:
+                stocks.append(str(row[0]))
+        
+
+                
+        for i in range (len(stocks)):
+
+                
+                contract = Stock(stocks[i] ,'SMART','USD')
+                print(contract)
+
+                order = MarketOrder('BUY', 10)
+
+                print(order)
 
         
-        contract = Stock(stocks[i] ,'SMART','GDP')
-        print(contract)
 
-        order = MarketOrder('BUY', 10)
+                trade = ib.placeOrder(contract , order)
 
-       
-
-        trade = ib.placeOrder(contract , order)
-
-        print(trade)
-ib.run()
+                print(trade)
+        ib.run()
 
         
 

@@ -147,6 +147,7 @@ class analysis():
                 
                 print(f"Prediction:{prediction}")
                 print(f"Prediction:{predicted2}")
+                print(self.stock)
                 
                 
                 #print(f"Prediction:{self.stock}")

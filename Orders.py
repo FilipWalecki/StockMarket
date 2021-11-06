@@ -14,7 +14,7 @@ class Trader:
                 self.ib = IB()
                 self.ib.connect('127.0.0.1', 7497, clientId=1)
 
-        def buy_passed_stocks():
+        def buy_passed_stocks(self):
                 stocks = []
 
                 self.cursor.execute('''SELECT * FROM passed''')
@@ -41,7 +41,7 @@ class Trader:
 
                         print(trade)
                 self.ib.run()
-        def close_position():
+        def close_position(self):
                 pass
         
                 

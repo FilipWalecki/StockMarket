@@ -9,18 +9,20 @@ import datetime as time
 import csv
 import sqlite3
 
-
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
 from tensorflow.python.util.keras_deps import get_load_model_function
 from threading import Thread
 
+class Analysis:
+    stocks = []
 
+    def __init__(self, conn, cursor):
+        self.conn = conn
+        self.cursor = cursor
 
-class analysis():
-    def __init__(self):
-        self.stock = ""
+        # self.stock = ""
         self.stocks =[]
         self.x_train =[]
         self.y_train =[]
@@ -28,34 +30,19 @@ class analysis():
         self.predicted_prices = []
         self.actual_prices = []
         self.good_stocks = []
-        #establishing connection with database
-        self.conn = sqlite3.connect('stocks.db')
-        self.cursor = self.conn.cursor()
 
-    
-        
-        
     def dataManipulation(self):
-        """with open('file.csv', 'r') as f:
-            reader = csv.reader(f)
-            lists = list(f)
-        for i in range(len(lists)):
-            self.stocks.append(lists[i].strip('\n'))"""
-
         #loading hte values from databse into a list
-        
-        transfroming = []
+        # cursor = conn.cursor()
+
 
         self.cursor.execute('''SELECT * FROM stock''')
 
         rows = self.cursor.fetchall()
         for row in rows:
             self.stocks.append(str(row[0]))
-    
-        
-        
-       
 
+        self.conn.commit()
 
 
         #Loading the data
@@ -161,22 +148,17 @@ class analysis():
                 
     def AddingToCsv(self): 
       
-            print(self.good_stocks)     
-            for i in range(len(self.good_stocks)):
-                self.cursor.execute('INSERT INTO passed VALUES(?)',(self.good_stocks[i],))
+        # conn = sqlite3.connect('stocks.db')
+        # cursor = conn.cursor()
 
-                self.conn.commit()
+        for i in range(len(self.good_stocks)):
+            self.cursor.execute('INSERT INTO passed VALUES(?)',(self.good_stocks[i],))
+
+        self.conn.commit()
             
     def runall(self):
-        
-        Thread(target= self.dataManipulation()).start()
-        #func1_thread = Thread(target= self.dataManipulation)
-        
-        #while func1_thread.is_
-        Thread(target= self.AddingToCsv()).start()
-
-
-
+        self.dataManipulation()
+        self.AddingToCsv()
 
 #Ploting the predictions dont need it now might use it in the future
 """

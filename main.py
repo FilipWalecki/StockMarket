@@ -1,18 +1,29 @@
-import analysis as a
+from analysis import Analysis
 import psutil
-
-import Orders
+import sqlite3
+from Orders import Orders
 import os
 
-#GAME PLAN
-#RUN GUI-->analysis -- >second analysis ----.orders
+#Runner
 if __name__ == "__main__":
-    #os.system("Trader Workstation")
-    #if 'tws.exe' in (i.name() for i in psutil.process_iter()) == True:
-    run = a.analysis()
-    run.runall()
-    Orders.connection()
-    Orders.buying()
+    # Initialize database connection
+    conn = sqlite3.connect('stocks.db')
+    cursor = conn.cursor()
+
+    # Clean up old results
+    cursor.execute('''DELETE FROM passed''')
+    conn.commit()
+    
+    # Do analysis
+    analysisObj = Analysis(conn, cursor)
+    analysisObj.runall()
+
+    # Buy now
+    ordersObj = Orders(conn, cursor)
+    ordersObj.buy_passed_stocks()
+
+    # Close DB connection
+    conn.close()
     
 
     

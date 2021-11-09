@@ -1,28 +1,25 @@
 from ast import Str
-from os import lseek
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy.core.records import array
 import pandas as pd
 import pandas_datareader as web 
 import datetime as time
-import csv
 import sqlite3
 
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
 from tensorflow.python.util.keras_deps import get_load_model_function
-from threading import Thread
+
 
 class Analysis:
-    stocks = []
+   
 
     def __init__(self, conn, cursor):
         self.conn = conn
         self.cursor = cursor
 
-        # self.stock = ""
+        
         self.stocks =[]
         self.x_train =[]
         self.y_train =[]
@@ -43,15 +40,18 @@ class Analysis:
             self.stocks.append(str(row[0]))
 
         self.conn.commit()
-
+        #testing if data for this stock exists
+        
 
         #Loading the data
-
+        
         for i in range(len(self.stocks)):
+            try:
                 self.x_test = []
                 self.x_train = []
                 self.y_train = []
                 self.stock = self.stocks[i]
+                
                 start = time.datetime(2018,1,1)
                 end  = time.datetime(2021,1,1)
 
@@ -90,7 +90,7 @@ class Analysis:
                 #Test the model accuracy
 
                 test_start = time.datetime(2021,1,1)
-                test_end = time.datetime.now()
+                test_end = time.datetime.now()-time.timedelta(days=1)
 
                 test_data = web.DataReader(self.stock, 'yahoo',test_start, test_end)
                 self.actual_prices = test_data['Close'].values
@@ -115,7 +115,7 @@ class Analysis:
                    
                 #Predict Next Day
                 
-                real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
+                real_data = [model_inputs[len(model_inputs)+2 - PredictionDays:len(model_inputs+2 ),0]]
                 real_data = np.array(real_data)
                 real_data = np.reshape(real_data,(real_data.shape[0],real_data.shape[1],1))
 
@@ -123,7 +123,7 @@ class Analysis:
                 prediction = scaler.inverse_transform(prediction)
 
                 #predicitng the 4th day in order to see if the stock will rise or fall
-                prediction2 = [model_inputs[len(model_inputs)+4 - PredictionDays:len(model_inputs+4 ),0]]
+                prediction2 = [model_inputs[len(model_inputs)+5 - PredictionDays:len(model_inputs+5 ),0]]
                 prediction2 = np.array(prediction2)
                 prediction2 = np.reshape(prediction2,(prediction2.shape[0],prediction2.shape[1],1))
 
@@ -142,19 +142,18 @@ class Analysis:
 
                 
                 #Checking if thew prediction was accurate
-                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.005 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.995 and prediction>predicted2:
+                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.01 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.99 and prediction>predicted2:
                      self.good_stocks.append(self.stock)
+            except:
+                pass
                 
                 
     def AddingToCsv(self): 
-      
-        # conn = sqlite3.connect('stocks.db')
-        # cursor = conn.cursor()
-
+        #placing stocks to separate database
+        
         for i in range(len(self.good_stocks)):
-            self.cursor.execute('INSERT INTO passed VALUES(?)',(self.good_stocks[i],))
-
-        self.conn.commit()
+            self.cursor.execute('''INSERT INTO passed VALUES(?)''',(self.good_stocks[i],))
+            self.conn.commit()
             
     def runall(self):
         self.dataManipulation()

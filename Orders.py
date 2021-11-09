@@ -1,5 +1,4 @@
 from ib_insync import *
-import csv 
 import pandas as pd
 import pandas_datareader as web 
 import datetime as time
@@ -13,35 +12,68 @@ class Trader:
                 self.cursor = cursor
                 self.ib = IB()
                 self.ib.connect('127.0.0.1', 7497, clientId=1)
+                self.stocks = []
 
         def buy_passed_stocks(self):
-                stocks = []
+                
 
                 self.cursor.execute('''SELECT * FROM passed''')
+                
 
                 rows = self.cursor.fetchall()
                 for row in rows:
-                        stocks.append(str(row[0]))
+                        self.stocks.append(str(row[0]))
                 
 
+
+        
+                print(self.stocks)
                         
-                for i in range (len(stocks)):
+                for i in range (len(self.stocks)):
 
                         
-                        contract = Stock(stocks[i] ,'SMART','USD')
-                        print(contract)
+                        contract = Stock(self.stocks[i] ,'SMART','USD')
+                        
 
                         order = MarketOrder('BUY', 10)
-
                         print(order)
+                        
 
                 
 
                         trade = self.ib.placeOrder(contract , order)
-
                         print(trade)
+
+
+                        #placing the orders into a database
+                
+                      
+                        self.cursor.execute('INSERT INTO Orders VALUES(?,?,?,?)',(self.stocks[i],'TRUE',time.date.today(),time.date.today()+time.timedelta(days=4)))
+                        self.conn.commit()
                 self.ib.run()
+                        
+                        
+
+                
         def close_position(self):
-                pass
+                self.cursor.execute("SELECT ticker,Sell_date FROM Orders WHERE isBought = 'TRUE'")
+                #aChange the true values to false
+                rows = self.cursor.fetchall()
+                
+               
+               
+                for row in rows:
+                       
+                        if row[1] == str(time.date.today()):
+                               
+                                print(time.datetime.today().date())
+
+                                contract = Stock(row[0],'SMART','USD')
+                                order = MarketOrder('SELL',10)
+                                trade = self.ib.placeOrder(contract,order)
+                                self.cursor.execute('UPDATE Orders SET isBought = ? WHERE ticker = ?',('FALSE',row[0],))
+                                self.conn.commit()
+
+                                
         
                 

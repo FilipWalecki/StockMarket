@@ -1,8 +1,8 @@
 from analysis import Analysis
-import psutil
+
 import sqlite3
 from Orders import Trader
-import os
+
 
 #Runner
 if __name__ == "__main__":
@@ -11,16 +11,17 @@ if __name__ == "__main__":
     cursor = conn.cursor()
 
     # Clean up old results
-    # cursor.execute('''DELETE FROM passed''')
-    # conn.commit()
+    #cursor.execute('''DELETE FROM passed''')
+    #conn.commit()
     
     # Do analysis
-    # analysisObj = Analysis(conn, cursor)
-    # analysisObj.runall()
+    #analysisObj = Analysis(conn, cursor)
+    #analysisObj.runall()
 
     # Buy now
     traderObj = Trader(conn, cursor)
     traderObj.buy_passed_stocks()
+    traderObj.close_position()
 
     # Close DB connection
     conn.close()

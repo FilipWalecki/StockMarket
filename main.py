@@ -11,12 +11,12 @@ if __name__ == "__main__":
     cursor = conn.cursor()
 
     # Clean up old results
-    #cursor.execute('''DELETE FROM passed''')
-    #conn.commit()
+    cursor.execute('''DELETE FROM passed''')
+    conn.commit()
     
     # Do analysis
-    #analysisObj = Analysis(conn, cursor)
-    #analysisObj.runall()
+    analysisObj = Analysis(conn, cursor)
+    analysisObj.runall()
 
     # Buy now
     traderObj = Trader(conn, cursor)

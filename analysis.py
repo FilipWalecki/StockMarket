@@ -5,6 +5,7 @@ import pandas as pd
 import pandas_datareader as web 
 import datetime as time
 import sqlite3
+import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
@@ -52,8 +53,8 @@ class Analysis:
                 self.y_train = []
                 self.stock = self.stocks[i]
                 
-                start = time.datetime(2018,1,1)
-                end  = time.datetime(2021,1,1)
+                start = time.datetime(2016,1,1)
+                end  = time.datetime(2020,1,1)
 
                 data = web.DataReader(self.stock , 'yahoo' , start,end)
                 
@@ -89,8 +90,8 @@ class Analysis:
 
                 #Test the model accuracy
 
-                test_start = time.datetime(2021,1,1)
-                test_end = time.datetime.now()-time.timedelta(days=1)
+                test_start = time.datetime(2020,1,1)
+                test_end = time.datetime.now()
 
                 test_data = web.DataReader(self.stock, 'yahoo',test_start, test_end)
                 self.actual_prices = test_data['Close'].values
@@ -115,7 +116,7 @@ class Analysis:
                    
                 #Predict Next Day
                 
-                real_data = [model_inputs[len(model_inputs)+2 - PredictionDays:len(model_inputs+2 ),0]]
+                real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
                 real_data = np.array(real_data)
                 real_data = np.reshape(real_data,(real_data.shape[0],real_data.shape[1],1))
 
@@ -123,7 +124,7 @@ class Analysis:
                 prediction = scaler.inverse_transform(prediction)
 
                 #predicitng the 4th day in order to see if the stock will rise or fall
-                prediction2 = [model_inputs[len(model_inputs)+5 - PredictionDays:len(model_inputs+5 ),0]]
+                prediction2 = [model_inputs[len(model_inputs)+4 - PredictionDays:len(model_inputs+4 ),0]]
                 prediction2 = np.array(prediction2)
                 prediction2 = np.reshape(prediction2,(prediction2.shape[0],prediction2.shape[1],1))
 
@@ -134,15 +135,23 @@ class Analysis:
                 
                 print(f"Prediction:{prediction}")
                 print(f"Prediction:{predicted2}")
+                print(self.predicted_prices[-1])
                 print(self.stock)
                 
+                '''plt.plot(self.actual_prices, color = 'red')
+                plt.plot(self.predicted_prices,color ='green')
+                plt.title(f'{self.stock} share price')
+                plt.xlabel('time')
+                plt.ylabel('Share price')
+                plt.legend()
+                plt.show()'''
                 
                 #print(f"Prediction:{self.stock}")
-                #print(f"Real:{self.predicted_prices}")
-
+                
+              
                 
                 #Checking if thew prediction was accurate
-                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.01 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.99 and prediction>predicted2:
+                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.01 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.97  and float(self.predicted_prices[-1])<float(predicted2) :
                      self.good_stocks.append(self.stock)
             except:
                 pass
@@ -160,14 +169,6 @@ class Analysis:
         self.AddingToCsv()
 
 #Ploting the predictions dont need it now might use it in the future
-"""
-                plt.plot(actual_prices, color = 'red')
-                plt.plot(predicted_prices,color ='green')
-                plt.title(f'{company} share price')
-                plt.xlabel('time')
-                plt.ylabel('Share price')
-                plt.legend()
-                plt.show()"""
 
                 
         
@@ -179,3 +180,4 @@ class Analysis:
         
 
         
+    

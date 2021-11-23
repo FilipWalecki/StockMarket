@@ -21,7 +21,9 @@ if __name__ == "__main__":
     # Buy now
     traderObj = Trader(conn, cursor)
     traderObj.buy_passed_stocks()
-    traderObj.close_position()
+    #traderObj.close_position()
+    #traderObj.quickfix()
+    
 
     # Close DB connection
     conn.close()

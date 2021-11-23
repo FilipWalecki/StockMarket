@@ -63,7 +63,7 @@ class Analysis:
                 scaler = MinMaxScaler(feature_range=(0,1))
                 ScaledData = scaler.fit_transform(data['Close'].values.reshape(-1,1))
 
-                PredictionDays = 60
+                PredictionDays = 80
 
                
 

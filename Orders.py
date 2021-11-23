@@ -3,6 +3,7 @@ import pandas as pd
 import pandas_datareader as web 
 import datetime as time
 import sqlite3
+from ib_insync.wrapper import Wrapper
 # util.startLoop()  # uncomment this line when in a notebook
         
 
@@ -66,13 +67,18 @@ class Trader:
                        
                         if row[1] == str(time.date.today()):
                                
-                                print(time.datetime.today().date())
+                                
 
                                 contract = Stock(row[0],'SMART','USD')
                                 order = MarketOrder('SELL',10)
                                 trade = self.ib.placeOrder(contract,order)
-                                self.cursor.execute('UPDATE Orders SET isBought = ? WHERE ticker = ?',('FALSE',row[0],))
+                                self.cursor.execute('UPDATE Orders SET isBought = ? WHERE ticker = ? AND Sell_date <= ? ',('FALSE',row[0],time.date.today(),))
                                 self.conn.commit()
+                self.ib.run()
+        def quickfix(self):
+                
+                self.cursor.execute("UPDATE Orders SET isBought = ?  WHERE Sell_date >= ?",('TRUE',time.date.today(),))
+                self.conn.commit()
 
                                 
         

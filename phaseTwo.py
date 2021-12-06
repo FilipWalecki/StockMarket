@@ -1,20 +1,45 @@
-from os import lseek
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import pandas_datareader as web 
-import datetime as time
-import csv 
+from tradingview_ta import TA_Handler, Interval, Exchange
+import time
+class secondanalysis:
+    def __init__(self,conn,cursor):
+        self.conn = conn
+        self.cursor = cursor
+        
 
+    def second_analysis(self):
+        self.cursor.execute('''SELECT * FROM passed''')
 
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout,LSTM
-from tensorflow.python.util.keras_deps import get_load_model_function
+        rows = self.cursor.fetchall()
+        for row in rows:
+            self.stocks.append(str(row[0]))
 
-ToRead =[]
-with open('good_stocks', 'r') as f:
-            reader = csv.reader(f)
-            lists = list(f)
-for i in range(len(lists)):
-            ToRead.append(lists[i].strip('\n'))
+        self.conn.commit()
+        last_order = "sell"
+    # Instantiate TA_Handler.
+        handler = TA_Handler(
+            symbol="SYMBOL",
+            exchange="america",
+            screener="NASDAQ",
+            interval= Interval.INTERVAL_1_DAY,
+        )
+
+        # Repeat forever.
+        while True:
+            # Retrieve recommendation.
+            rec = handler.get_analysis()["RECOMMENDATION"]
+
+            # Create a buy order if the recommendation is "BUY" or "STRONG_BUY" and the last order is "sell".
+            # Create a sell order if the recommendation is "SELL" or "STRONG_SELL" and the last order is "buy".
+            if "BUY" in rec and last_order == "sell":
+                # REPLACE COMMENT: Create a buy order using your exchange's API.
+
+                last_order = "buy"
+            elif "SELL" in rec and last_order == "buy":
+                # REPLACE COMMENT: Create a sell order using your exchange's API.
+
+                last_order = "sell"
+
+            # Wait for x seconds before retrieving new analysis.
+            # The time should be the same as the interval.
+            time.sleep(x)
+

@@ -1,35 +1,19 @@
-from tkinter import *
-from functools import partial
+import pandas_datareader as web 
+import pandas as pd
+import datetime as time
+from ib_insync import *
 
-#needs a login checker
+ib = IB()
+print(time.date.today()-time.timedelta(days=2))
+ib.connect('127.0.0.1', 7497, clientId=1)
+test = web.DataReader('AAPL', 'yahoo','2022-01-27')['Close']
+acc_vals = float([v.value for v in ib.accountValues() if v.tag == 'CashBalance' and v.currency == 'BASE'][0])
+t = test.to_numpy()
+print(t)
+ammount =acc_vals*0.03/t[0]
+print(round(ammount,0))
 
-def validateLogin(username, password):
-    
-	print("username entered :", username.get())
-	print("password entered :", password.get())
-    
-#window
-tkWindow = Tk()  
-tkWindow.geometry('400x150')  
-tkWindow.title('Trading bot login')
+ib.run()
 
-#username label and text entry box
-usernameLabel = Label(tkWindow, text="User Name").grid(row=0, column=0)
-username = StringVar()
-usernameEntry = Entry(tkWindow, textvariable=username).grid(row=0, column=1)  
-
-#password label and password entry box
-passwordLabel = Label(tkWindow,text="Password").grid(row=1, column=0)  
-password = StringVar()
-passwordEntry = Entry(tkWindow, textvariable=password, show='*').grid(row=1, column=1)  
-
-validateLogin = partial(validateLogin, username, password)
-
-#login button
-loginButton = Button(tkWindow, text="Login", command=validateLogin).grid(row=4, column=0)  
-
-
-
-tkWindow.mainloop()
 
 

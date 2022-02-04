@@ -15,7 +15,7 @@ from tensorflow.python.util.keras_deps import get_load_model_function
 
 class Analysis:
    
-
+    #initializing the class
     def __init__(self, conn, cursor):
         self.conn = conn
         self.cursor = cursor
@@ -28,12 +28,11 @@ class Analysis:
         self.predicted_prices = []
         self.actual_prices = []
         self.good_stocks = []
-
+    #responsible for the analysis of the data
     def dataManipulation(self):
-        #loading hte values from databse into a list
-        # cursor = conn.cursor()
+       
 
-
+        #uploading ticker symbols from the database
         self.cursor.execute('''SELECT * FROM stock''')
 
         rows = self.cursor.fetchall()
@@ -41,25 +40,25 @@ class Analysis:
             self.stocks.append(str(row[0]))
 
         self.conn.commit()
-        #testing if data for this stock exists
         
 
-        #Loading the data
+      
         
         for i in range(len(self.stocks)):
+            #using try and except to avoid any errors
             try:
                 self.x_test = []
                 self.x_train = []
                 self.y_train = []
                 self.stock = self.stocks[i]
-                
+                #the start and end of the inital anylisis
                 start = time.datetime(2016,1,1)
                 end  = time.datetime(2020,1,1)
-
+                #getting the data from the start date to the end date
                 data = web.DataReader(self.stock , 'yahoo' , start,end)
                 
 
-                #Prepare Data
+                #Preparing the Data
                 scaler = MinMaxScaler(feature_range=(0,1))
                 ScaledData = scaler.fit_transform(data['Close'].values.reshape(-1,1))
 
@@ -73,7 +72,7 @@ class Analysis:
 
                 self.x_train,self.y_train = np.array(self.x_train), np.array(self.y_train)
                 self.x_train = np.reshape(self.x_train,(self.x_train.shape[0],self.x_train.shape[1],1))
-                #build the model
+                #building the model
                 model = Sequential()
 
                 model.add(LSTM(units =50,return_sequences=True,input_shape =(self.x_train.shape[1],1) ))
@@ -88,7 +87,7 @@ class Analysis:
                 model.fit(self.x_train,self.y_train ,epochs=25,batch_size =32)
 
 
-                #Test the model accuracy
+                #Testing the accuracy of this model by asking it to predict the stocks behaviour between 2020 and now
 
                 test_start = time.datetime(2020,1,1)
                 test_end = time.datetime.now()
@@ -114,7 +113,7 @@ class Analysis:
                 self.predicted_prices = model.predict(self.x_test)
                 self.predicted_prices = scaler.inverse_transform(self.predicted_prices)
                    
-                #Predict Next Day
+                #Predicting  the  next Day
                 
                 real_data = [model_inputs[len(model_inputs)+1 - PredictionDays:len(model_inputs+1 ),0]]
                 real_data = np.array(real_data)
@@ -137,7 +136,7 @@ class Analysis:
                 print(f"Prediction:{predicted2}")
                 print(self.predicted_prices[-1])
                 print(self.stock)
-                
+                #This part is reponsible for ploting of the graphs
                 '''plt.plot(self.actual_prices, color = 'red')
                 plt.plot(self.predicted_prices,color ='green')
                 plt.title(f'{self.stock} share price')
@@ -146,19 +145,19 @@ class Analysis:
                 plt.legend()
                 plt.show()'''
                 
-                #print(f"Prediction:{self.stock}")
+               
                 
               
                 
                 #Checking if thew prediction was accurate
-                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.01 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.97  and float(self.predicted_prices[-1])<float(predicted2) :
+                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.05 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.95  and float(self.predicted_prices[-1])<float(predicted2) :
                      self.good_stocks.append(self.stock)
             except:
                 pass
                 
                 
-    def AddingToCsv(self): 
-        #placing stocks to separate database
+    def AddingToDB(self): 
+        #placing stocks to separate databases
         
         for i in range(len(self.good_stocks)):
             self.cursor.execute('''INSERT INTO passed VALUES(?)''',(self.good_stocks[i],))
@@ -166,9 +165,9 @@ class Analysis:
             
     def runall(self):
         self.dataManipulation()
-        self.AddingToCsv()
+        self.AddingToDB()
 
-#Ploting the predictions dont need it now might use it in the future
+
 
                 
         

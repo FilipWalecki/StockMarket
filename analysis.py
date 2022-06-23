@@ -150,7 +150,7 @@ class Analysis:
               
                 
                 #Checking if thew prediction was accurate
-                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.05 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.95  and float(self.predicted_prices[-1])<float(predicted2) :
+                if np.sum(self.predicted_prices)/np.sum(self.actual_prices) <= 1.05 and np.sum(self.predicted_prices)/np.sum(self.actual_prices) >= 0.95 and float(self.predicted_prices[-1])<float(predicted2) :
                      self.good_stocks.append(self.stock)
             except:
                 pass
@@ -167,6 +167,19 @@ class Analysis:
         self.dataManipulation()
         self.AddingToDB()
 
+
+
+                
+        
+
+
+
+        
+
+        
+
+        
+    
 
 
                 

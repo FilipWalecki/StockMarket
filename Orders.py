@@ -32,9 +32,9 @@ class Trader:
                 
                 for i in range (len(self.stocks)) :
                         #Adjusting the number of stocks bought based on account value
-                        test = web.DataReader(self.stocks[i], 'yahoo',time.date.today())['Close']
+                        price = web.DataReader(self.stocks[i], 'yahoo',time.date.today()-time.timedelta(days=2))['Close']
                         acc_vals = float([v.value for v in self.ib.accountValues() if v.tag == 'CashBalance' and v.currency == 'BASE'][0])
-                        converting_to_list = test.to_numpy()
+                        converting_to_list = price.to_numpy()
                         ammount =acc_vals*0.03/converting_to_list[0]
                         final = round(ammount,0)
                         print(final)
@@ -58,7 +58,7 @@ class Trader:
                         
                       
         def close_position(self):
-                self.cursor.execute("SELECT ticker,Sell_date FROM Orders WHERE isBought = 'TRUE'")
+                self.cursor.execute("SELECT ticker,Sell_date,AmmountBought FROM Orders WHERE isBought = 'TRUE'")
                 #aChange the true values to false
                 rows = self.cursor.fetchall()
                 
@@ -66,12 +66,12 @@ class Trader:
                
                 for row in rows:
                        
-                        if row[1] == str(time.date.today()):
+                        if row[1] <= str(time.date.today()):
                                
-                                
+                        
 
                                 contract = Stock(row[0],'SMART','USD')
-                                order = MarketOrder('SELL',10)
+                                order = MarketOrder('SELL',row[2])
                                 trade = self.ib.placeOrder(contract,order)
                                 self.cursor.execute('UPDATE Orders SET isBought = ? WHERE ticker = ? AND Sell_date <= ? ',('FALSE',row[0],time.date.today(),))
                                 self.conn.commit()
@@ -79,9 +79,6 @@ class Trader:
                                 print(trade)
                 
                 self.ib.run()
-                                
-             
-
 
                                 
         

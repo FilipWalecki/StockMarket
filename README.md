@@ -7,7 +7,7 @@ Important files:
 -Orders.py(responsible for buying and selling stock )
 -analysis.py(analises stock from the S&P500 list)
 -Stocks.db(External database responsible for holding all the valuable information)
-Libraries it uses:
+#Libraries it uses:
 -numpy
 -pandas_datareader
 -sklearn

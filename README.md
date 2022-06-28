@@ -17,5 +17,7 @@ Libraries it uses:
 -ib_insync
 -sqlite3
 
+As this was part of my NEA project I had to document everything.Here is the link to the documentation and the part of the project that had the most impact on the final grade:
 
+https://docs.google.com/document/d/1ocCH0pbcaEVKOMLxV0ccKWyEWQO7ek4EC3TMQpxAB3U/edit?usp=sharing
 
